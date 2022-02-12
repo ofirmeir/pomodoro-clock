@@ -6,12 +6,31 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 25
-SHORT_BREAK_MIN = 5
-LONG_BREAK_MIN = 20
+# WORK_MIN = 25
+WORK_MIN = 0.2
+# SHORT_BREAK_MIN = 5
+SHORT_BREAK_MIN = 0.2
+# LONG_BREAK_MIN = 20
+LONG_BREAK_MIN = 0.2
 reps = 0
+timer = None
+check_marks = ""
 
 # ---------------------------- TIMER RESET ------------------------------- # 
+
+
+def reset_timer():
+    global timer
+    global reps
+    # stops the window timer
+    window.after_cancel(timer)
+    # reset timer text to 00:00
+    canvas.itemconfig(timer_text, text="00:00")
+    # change timer_label to "Timer"
+    timer_title.config(text="Timer", fg=GREEN)
+    # reset check_marks
+    label_check_marks.config(text="")
+    reps = 0
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 
@@ -36,6 +55,8 @@ def btn_start_clicked():
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
 
 def count_down(counter):
+    global check_marks
+    global timer
     minuets = floor(counter / 60)
     seconds = counter % 60
 
@@ -43,10 +64,15 @@ def count_down(counter):
         seconds = f"0{seconds}"
 
     if counter > 0:
-        canvas.itemconfig(timer_text , text=f"{minuets}:{seconds}")
-        window.after(1000, count_down, counter - 1)
+        canvas.itemconfig(timer_text, text=f"{minuets}:{seconds}")
+        timer = window.after(1000, count_down, counter - 1)
     else:
         btn_start_clicked()
+        work_cycles = floor(reps / 2)
+        marks = ""
+        for _ in range(work_cycles):
+            marks += "✔"
+        label_check_marks.config(text=marks)
 
 # ---------------------------- UI SETUP ------------------------------- #
 
@@ -67,10 +93,10 @@ canvas.grid(row=1, column=1)
 btn_start = Button(text="Start", command=btn_start_clicked)
 btn_start.grid(row=2, column=0)
 
-btn_reset = Button(text="Reset")
+btn_reset = Button(text="Reset", command=reset_timer)
 btn_reset.grid(row=2, column=2)
 
-label_check_marks = Label(text="✔", fg=GREEN, bg=YELLOW)
+label_check_marks = Label(fg=GREEN, bg=YELLOW)
 label_check_marks.grid(row=3, column=1)
 
 window.mainloop()
